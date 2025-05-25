@@ -15,7 +15,6 @@ recipe_to_index = joblib.load('../New_CF/fast_recipe_to_index.pkl')
 index_to_recipe = {v: k for k, v in recipe_to_index.items()}
 
 df = pd.read_csv('../CB_with_clustering/final_meal_dataset.csv')
-interactions_df = pd.read_csv('../dataset/RAW_interactions.csv')
 raw_df = pd.read_csv('../dataset/RAW_recipes.csv')
 raw_df = raw_df[['id', 'ingredients', 'steps']]
 
@@ -104,7 +103,7 @@ if submitted:
 
     daily_target = get_daily_target(user_info)
     goal_weight = goal_weights[goal]
-    user_id = interactions_df['user_id'].value_counts().index[3]  # Change logic if needed
+    user_id = 424680  # Change logic if needed
     user_idx = user_to_index[user_id]
 
     st.subheader("📊 Daily Nutritional Target")
