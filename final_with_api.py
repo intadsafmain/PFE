@@ -138,6 +138,8 @@ if submitted:
 
     st.subheader("🍽️ Recommendations")
     for category in df['category'].unique():
+         if category.lower() == 'other':  # ❌ Skip the 'other' category
+            continue
         df_cat = df[df['category'] == category].reset_index(drop=True)
         df_cat = df_cat[~df_cat['id'].apply(contains_excluded_ingredient)].reset_index(drop=True)
         if df_cat.empty:
@@ -165,20 +167,22 @@ if submitted:
                 cf_scores.append(0.0)
         cb_candidates['cf_score'] = cf_scores
 
-        top_cb = cb_candidates.sort_values(by='cb_distance').head(10)
-        top_cf_reranked = top_cb.sort_values(by='cf_score', ascending=False).head(5)
+        top_cb = cb_candidates.sort_values(by='cb_distance').head(20)
+        top_cf_reranked = top_cb.sort_values(by='cf_score', ascending=False).head(10)
+        final_sampled = top_cf_reranked.sample(min(3, len(top_cf_reranked)))
 
-        if not top_cf_reranked.empty:
-            selected = top_cf_reranked.sample(1).iloc[0]
+        if not final_sampled.empty:
             st.markdown(f"### 🔹 {category.title()}")
-            st.write(f"📌 **{selected['name']}**")
-            st.write(f"⚖️ MSE: `{selected['cb_distance']:.4f}` | 🌟 CF Score: `{selected['cf_score']*5:.2f}`")
-            with st.expander(f"📌 {selected['name']} (click to view instructions)"):
-                recipe_id = selected['id']
-                row = raw_df[raw_df['id'] == recipe_id]
-                if not row.empty:
-                    steps = eval(row.iloc[0]['steps'])
-                    for i, step in enumerate(steps):
-                        st.markdown(f"Step {i+1}: {step}")
-                else:
-                    st.warning("No instructions found.")
+            for _, selected in final_sampled.iterrows():
+                st.write(f"📌 **{selected['name']}**")
+                st.write(f"⚖️ MSE: `{selected['cb_distance']:.4f}` | 🌟 CF Score: `{selected['cf_score']*5:.2f}`")
+
+                with st.expander(f"📌 {selected['name']} (click to view instructions)"):
+                    recipe_id = selected['id']
+                    row = raw_df[raw_df['id'] == recipe_id]
+                    if not row.empty:
+                        steps = eval(row.iloc[0]['steps'])
+                        for i, step in enumerate(steps):
+                            st.markdown(f"Step {i+1}: {step}")
+                    else:
+                        st.warning("No instructions found.")
