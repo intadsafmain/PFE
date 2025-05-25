@@ -146,17 +146,18 @@ if submitted:
         top_cf_reranked = top_cb.sort_values(by='cf_score', ascending=False).head(10)
         top_cf_reranked = top_cf_reranked.sample(min(2, len(top_cf_reranked)))
 
-        if not top_cf_reranked.empty:
-            selected = top_cf_reranked.sample(1).iloc[0]
-            st.markdown(f"### 🔹 {category.title()}")
-            st.write(f"📌 **{selected['name']}**")
-            st.write(f"⚖️ MSE: `{selected['cb_distance']:.4f}` | 🌟 CF Score: `{selected['cf_score']*5:.2f}`")
-            with st.expander(f"📌 {selected['name']} (click to view instructions)"):
-                recipe_id = selected['id']
-                row = raw_df[raw_df['id'] == recipe_id]
-                if not row.empty:
-                    steps = eval(row.iloc[0]['steps'])
-                    for i, step in enumerate(steps):
-                        st.markdown(f"Step {i+1}: {step}")
-                else:
-                    st.warning("No instructions found.")
+        if not final_sampled.empty:
+              st.markdown(f"### 🔹 {category.title()}")
+              for _, selected in final_sampled.iterrows():
+                  st.write(f"📌 **{selected['name']}**")
+                  st.write(f"⚖️ MSE: `{selected['cb_distance']:.4f}` | 🌟 CF Score: `{selected['cf_score']*5:.2f}`")
+
+                  with st.expander(f"📌 {selected['name']} (click to view instructions)"):
+                      recipe_id = selected['id']
+                      row = raw_df[raw_df['id'] == recipe_id]
+                      if not row.empty:
+                          steps = eval(row.iloc[0]['steps'])
+                          for i, step in enumerate(steps):
+                              st.markdown(f"Step {i+1}: {step}")
+                      else:
+                          st.warning("No instructions found.")
