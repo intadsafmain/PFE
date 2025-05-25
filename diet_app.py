@@ -110,7 +110,11 @@ if submitted:
     st.json(daily_target)
 
     st.subheader("🍽️ Recommendations")
+     
+       
     for category in df['category'].unique():
+         if category.lower() == 'other':  # ❌ Skip the 'other' category
+            continue
         df_cat = df[df['category'] == category].reset_index(drop=True)
         df_cat = df_cat[~df_cat['id'].apply(contains_excluded_ingredient)].reset_index(drop=True)
         if df_cat.empty:
@@ -138,8 +142,9 @@ if submitted:
                 cf_scores.append(0.0)
         cb_candidates['cf_score'] = cf_scores
 
-        top_cb = cb_candidates.sort_values(by='cb_distance').head(10)
-        top_cf_reranked = top_cb.sort_values(by='cf_score', ascending=False).head(5)
+        top_cb = cb_candidates.sort_values(by='cb_distance').head(20)
+        top_cf_reranked = top_cb.sort_values(by='cf_score', ascending=False).head(10)
+        top_cf_reranked = top_cf_reranked.sample(min(2, len(top_cf_reranked)))
 
         if not top_cf_reranked.empty:
             selected = top_cf_reranked.sample(1).iloc[0]
