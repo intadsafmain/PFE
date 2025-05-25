@@ -144,7 +144,7 @@ if submitted:
 
         top_cb = cb_candidates.sort_values(by='cb_distance').head(20)
         top_cf_reranked = top_cb.sort_values(by='cf_score', ascending=False).head(10)
-        top_cf_reranked = top_cf_reranked.sample(min(2, len(top_cf_reranked)))
+        final_sampled = top_cf_reranked.sample(min(2, len(top_cf_reranked)))
 
         if not final_sampled.empty:
               st.markdown(f"### 🔹 {category.title()}")
